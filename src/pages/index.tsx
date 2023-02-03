@@ -5,14 +5,22 @@ import {ArrowRightIcon} from "@chakra-ui/icons";
 import {motion, Transition} from "framer-motion";
 import React, {useState} from "react";
 import {homeBackground} from "@/pages/_app";
+import {useRouter} from "next/navigation";
+import {selectName, selectRoom, setName, setRoom} from "@/redux/blockSlice";
+import {useDispatch, useSelector} from "react-redux";
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
-    const [room,setRoom] = useState('');
-    const [name,setName] = useState('');
+    const router = useRouter();
+    const dispatch = useDispatch();
+
+    const room: string = useSelector(selectRoom);
+    const name = useSelector(selectName);
+
     const [isRoomSet, setIsRoomSet] = useState(false);
     const [isNameSet, setIsNameSet] = useState(false);
+
     const transitionValues: Transition = {
         duration: 0.5,
         repeat: Infinity,
@@ -27,17 +35,18 @@ export default function Home() {
                 setIsRoomSet(true);
             }
         }
-        if(!isNameSet){
-
+        if(!isNameSet && isRoomSet){
+            setIsNameSet(true);
+            router.push('/room')
         }
     }
 
     const handleNameChange = (e:  React.ChangeEvent<HTMLInputElement>) => {
-        setName(e.target.value);
+        dispatch(setName(e.target.value))
     }
 
     const handleRoomChange = (e:  React.ChangeEvent<HTMLInputElement>) => {
-       setRoom(e.target.value);
+        dispatch(setRoom(e.target.value))
     }
 
   return (
@@ -73,7 +82,7 @@ export default function Home() {
                         initial={{x: 0}}
                         animate={{x: 5}}
                     >
-                        <IconButton variant={"unstyled"} color={"white"} aria-label='Next button' icon={<ArrowRightIcon />} />
+                        <IconButton onClick={handleIconClick} variant={"unstyled"} color={"white"} aria-label='Next button' icon={<ArrowRightIcon />} />
                     </motion.div>
                 </Flex>
             </Center>
