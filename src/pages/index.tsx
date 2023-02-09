@@ -1,22 +1,26 @@
 import Head from 'next/head'
-import { Inter } from '@next/font/google'
-import {Box, Button, Center, Flex, IconButton, Input, Text} from "@chakra-ui/react";
+import {Box, Center, createStandaloneToast, Flex, IconButton, Input, Text} from "@chakra-ui/react";
 import {ArrowRightIcon} from "@chakra-ui/icons";
 import {motion, Transition} from "framer-motion";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {homeBackground} from "@/pages/_app";
 import {useRouter} from "next/navigation";
-import {selectName, selectRoom, setName, setRoom} from "@/redux/blockSlice";
+import {selectName, selectCode, setName, setCode, setBlocks, setId} from "@/redux/blockSlice";
 import {useDispatch, useSelector} from "react-redux";
+import io from "socket.io-client";
 
-const inter = Inter({ subsets: ['latin'] })
+export const socket = io('',{
+    path: "/api/socketio",
+    reconnection: true,
+});
 
 export default function Home() {
     const router = useRouter();
+    const { ToastContainer, toast } = createStandaloneToast();
     const dispatch = useDispatch();
 
-    const room: string = useSelector(selectRoom);
-    const name = useSelector(selectName);
+    const code: string = useSelector(selectCode);
+    const name: string = useSelector(selectName);
 
     const [isRoomSet, setIsRoomSet] = useState(false);
     const [isNameSet, setIsNameSet] = useState(false);
@@ -29,15 +33,70 @@ export default function Home() {
         delay: 0.8
     };
 
+    useEffect((): any => {
+        if(!socket.connected){
+            socket.connect();
+        }
+
+        socket.on("connect", () => {
+            // log socket connection
+            console.log("SOCKET CONNECTED!", socket.id);
+        });
+
+        socket.on("joinSuccess", (payload) => {
+            setIsRoomSet(true);
+            dispatch(setId(payload._id))
+            console.log('efwefewf')
+        })
+
+        socket.on("joinFailed", () => {
+            toast({
+                title: 'Invalid Code',
+                description: "The room code used is invalid / No such room exists.",
+                position: "bottom",
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            })
+        })
+
+        socket.on("nameSetFailed", () => {
+            toast({
+                title: 'Setting Name Failed',
+                description: "Error setting name, please try again.",
+                position: "bottom",
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            })
+        })
+        
+        socket.on("nameSetSuccess", (payload) => {
+            setIsNameSet(true);
+            dispatch(setCode(payload.roomData.code))
+            dispatch(setBlocks(payload.roomData.blocks))
+            dispatch(setName(payload.name))
+            router.push('/room')
+        })
+
+        // // update chat on new message dispatched
+        // socket.on("message", (message: IMsg) => {
+        //     chat.push(message);
+        //     setChat([...chat]);
+        // });
+
+        // socket disconnect onUnmount if exists
+        if (socket) return () => socket.disconnect();
+    }, []);
+
     const handleIconClick = () => {
         if(!isRoomSet){
-            if(room.length === 6){
-                setIsRoomSet(true);
+            if(code.length === 6){
+                checkRoom();
             }
         }
         if(!isNameSet && isRoomSet){
-            setIsNameSet(true);
-            router.push('/room')
+            socket.emit("setName", {name,code:code})
         }
     }
 
@@ -46,7 +105,13 @@ export default function Home() {
     }
 
     const handleRoomChange = (e:  React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(setRoom(e.target.value))
+        dispatch(setCode(e.target.value))
+    }
+
+    const checkRoom = () => {
+        socket.emit("joinRoom", {
+            code
+        })
     }
 
   return (
@@ -66,7 +131,7 @@ export default function Home() {
                                 Enter the room code
                             </Text>
                             <br/>
-                            <Input value={room} onChange={handleRoomChange} maxLength={6} fontSize={'4xl'} placeholder={'000000'} w={'50vw'} h={'75px'} border={0} size={"lg"} bgColor='brand.900' boxShadow='0px 4px 4px 1px rgba(0, 0, 0, 0.25)'/>
+                            <Input value={code} onChange={handleRoomChange} minLength={6} maxLength={6} placeholder={'000000'} size='lg' />
                         </Box>
                         :
                         <Box>
@@ -74,7 +139,7 @@ export default function Home() {
                                 Enter your name
                             </Text>
                             <br/>
-                            <Input value={name} onChange={handleNameChange} fontSize={'4xl'} placeholder={'Name'} w={'50vw'} h={'75px'} border={0} size={"lg"} bgColor='brand.900' boxShadow='0px 4px 4px 1px rgba(0, 0, 0, 0.25)'/>
+                            <Input value={name} onChange={handleNameChange} placeholder={'Name'} size='lg' />
                         </Box>
                     }
                     <motion.div
@@ -87,6 +152,7 @@ export default function Home() {
                 </Flex>
             </Center>
         </Box>
+        <ToastContainer/>
     </>
   )
 }

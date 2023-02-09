@@ -1,30 +1,78 @@
-import {Box, Center, Flex, Grid, GridItem, Text} from "@chakra-ui/react";
+import {Box, Button, createStandaloneToast, Flex, Grid, GridItem, Text} from "@chakra-ui/react";
 import {roomBackGround} from "@/pages/_app";
-import {useSelector} from "react-redux";
-import {selectName, selectRoom} from "@/redux/blockSlice";
+import {useDispatch, useSelector} from "react-redux";
+import {selectBlocks, selectName, selectCode, setBlocks, selectId} from "@/redux/blockSlice";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { socket } from "..";
 
 export default function Room() {
-    const room: string = useSelector(selectRoom);
+    const { ToastContainer, toast } = createStandaloneToast();
+    const dispatch = useDispatch();
+    const router = useRouter();
+    const code: string = useSelector(selectCode);
     const name = useSelector(selectName);
-    const isShown = false;
-    const testArray = [
-        'Accra','Accra','Accra','Accra',
-        'Accra','Accra','Accra','Accra','Accra',
-        'Accra','Accra','Accra','Accra','Accra','Accra',
-        'Accra','Accra','Accra','Accra','Accra',
-        'Accra','Accra','Accra','Accra','Accra',
-        'Accra','Accra','Accra']
+    const blocks = useSelector(selectBlocks);
+    const id = useSelector(selectId);
+    const [currentTurn, setCurrentTurn] = useState('');
+    const [isRevealButtonClicked, setRevealButtonClicked] = useState(false);
+
+    useEffect(()=>
+    {
+        if(name === '' || code === ''){
+            router.push('/')
+        }else{
+            if(!socket.connected){
+                socket.connect();
+                socket.emit('joinRoom',{code})
+                socket.emit('getCurrentTurn', {code})
+            }else{
+                socket.emit('joinRoom',{code})
+                socket.emit('getCurrentTurn', {code})
+            }
+        }
+
+        socket.on('InitiateCurrentTurn', (payload) => {
+            setCurrentTurn(payload.currentTurn);
+        })
+
+        socket.on('setCurrentTurn', (payload) => {
+            setCurrentTurn(payload.currentTurn);
+        })
+
+        socket.on('BlockRevealSuccess', (payload) =>{
+            dispatch(setBlocks(payload.blocks));
+            console.log(payload)
+        })
+
+        socket.on('BlockRevealFailed', (payload) =>{
+            toast({
+                title: 'Failed to Reveal.',
+                description: payload,
+                position: "bottom",
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+            })
+        })
+    },[]);
+
+    const revealBlock = () => {
+        socket.emit('revealBlock', {id,code,name})
+        setRevealButtonClicked(true);
+    }
+    
 
     return (
         <Box style={roomBackGround} overflow={"auto"}>
             <Flex flexDirection={'column'} gap={15}>
                 <Flex flexDirection={'row'} justifyContent={'space-around'} >
                     <Text fontWeight={'bold'}>
-                        Room #{room}
+                        Room #{code}
                     </Text>
-                    <Text >
-                        {name}'s turn
-                    </Text>
+                    {currentTurn === name &&  <Button isDisabled={isRevealButtonClicked} onClick={revealBlock}>Reveal Block</Button>}
+                    {currentTurn !== '' && <Text> {currentTurn}'s turn</Text>}
+                    
                 </Flex>
                     <Grid
                         h='100%'
@@ -34,18 +82,18 @@ export default function Room() {
                         justifyItems={"center"}
                         gap={2}
                     >
-                        {testArray.map((data, index) => {
+                        {blocks.map((data, index) => {
                             return (
                                 <GridItem  key={index} minW='75px' w={'100%'} h='12vh' bg='#41518b' borderRadius={'10px'} border={'2px solid #3F3DA1'}>
-                                    {!isShown ?
+                                    {!data.isShown ?
                                         <></>
                                         :
                                         <Flex flexDirection={"column"} alignItems={"center"} justifyContent={"center"} height={'100%'}>
                                             <Text>
-                                                {data}
+                                                {data.info}
                                             </Text>
                                             <Text>
-                                                {name}
+                                                {data.user}
                                             </Text>
                                         </Flex>
                                     }
@@ -54,6 +102,7 @@ export default function Room() {
                         })}
                     </Grid>
             </Flex>
+            <ToastContainer/>
         </Box>
     )
 }

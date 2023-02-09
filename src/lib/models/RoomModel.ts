@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import {string} from "prop-types";
+
 
 export type Block = {
     info: string,
@@ -10,9 +10,11 @@ export const RoomSchema = new mongoose.Schema({
     code: String,
     blocks: [{
         info : String,
-        user : String
+        user : String,
+        isShown: Boolean
     }],
-    users: [String]
+    users: [String],
+    currentTurn: String,
 });
 
 const Room = mongoose.models.Room || mongoose.model('Room', RoomSchema)
