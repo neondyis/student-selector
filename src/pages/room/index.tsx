@@ -106,7 +106,3 @@ export default function Room() {
         </Box>
     )
 }
-
-type RoomProps = {
-
-}

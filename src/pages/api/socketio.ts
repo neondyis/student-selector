@@ -12,6 +12,7 @@ export const config = {
     },
 };
 // TODO : Complete Typing of everything to align with typescript
+// TODO : add logging for online monitor reporting
 
 // type Room = {
 //     _id: String,
@@ -103,7 +104,7 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
                 }
             })
             socket.on('revealBlock', async (payload)=> {
-                const blockList = (await Room.findOne({_id: payload.id, code: payload.code})).blocks.filter(block:Block => !block.user);
+                const blockList = (await Room.findOne({_id: payload.id, code: payload.code})).blocks.filter((block:Block) => !block.user);
                 if(blockList.length > 0){
                     const randomBlock = blockList[Math.floor(Math.random() * blockList.length)];
                     const room = await Room.findOneAndUpdate({code: payload.code, 'users': {$exists: true},

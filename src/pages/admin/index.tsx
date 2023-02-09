@@ -22,6 +22,7 @@ import { socket } from "..";
 
 
 export default function Admin() {
+    const password = 'Aylinka'
     const { ToastContainer, toast } = createStandaloneToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [showOptions, setShowOptions] = useState(false);
@@ -33,6 +34,7 @@ export default function Admin() {
     const [roomList, setRoomList] = useState([]);
     const [selectedRoom, setSelectedRoom] = useState<{}>();
     const [currentTurn, setCurrentTurn] = useState('');
+    const [passwordInput, setPasswordInput] = useState('');
 
     const handleCreateOnClick = () => {
         setShowOptions(true);
@@ -258,82 +260,96 @@ export default function Admin() {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
+            {passwordInput === password ? 
             <Center h={'100%'}>
-                {!showOptions &&
-                    <Flex flexDirection={'column'} gap={2}>
-                        <Button onClick={handleCreateOnClick} minW={'160px'}>
-                            Create a Room
-                        </Button>
-                        <Button onClick={handleManageOnClick} minW={'160px'}>
-                            Manage Rooms
-                        </Button>
-                    </Flex>
-                }
+            {!showOptions &&
+                <Flex flexDirection={'column'} gap={2}>
+                    <Button onClick={handleCreateOnClick} minW={'160px'}>
+                        Create a Room
+                    </Button>
+                    <Button onClick={handleManageOnClick} minW={'160px'}>
+                        Manage Rooms
+                    </Button>
+                </Flex>
+            }
 
-                {showCreate &&
-                    <Box>
-                        <Card width={'50vw'}>
-                            <CardHeader>
-                                <Flex flexDirection={"row"} alignItems={"center"}>
-                                    <IconButton aria-label={'Back button'} icon={<ArrowLeftIcon/>} onClick={() => {setShowCreate(false); setShowOptions(false)}}/>
-                                    <Text variant={'admin'} >Creating a Room</Text>
+            {showCreate &&
+                <Box>
+                    <Card width={'50vw'}>
+                        <CardHeader>
+                            <Flex flexDirection={"row"} alignItems={"center"}>
+                                <IconButton aria-label={'Back button'} icon={<ArrowLeftIcon/>} onClick={() => {setShowCreate(false); setShowOptions(false)}}/>
+                                <Text variant={'admin'} >Creating a Room</Text>
+                            </Flex>
+                        </CardHeader>
+                        <CardBody>
+                            <Flex gap={2} flexDirection={'column'}>
+                                <FormLabel>Room Code</FormLabel>
+                                <Input type='text' value={roomCode} onChange={e => setRoomCode(e.target.value)}
+                                       variant='admin' maxLength={6}/>
+                                <FormLabel>List Values - {listValues.length}</FormLabel>
+                                <Input type='text' value={listInput} onChange={e => setListInput(e.target.value)}
+                                       variant='admin'/>
+                                <Flex flexDirection={'row'} gap={2} flexWrap={'wrap'} maxH={'125px'}
+                                      overflow={'auto'}>
+                                    {listValues.map((listValue, index) => {
+                                        return (
+                                            <Tag key={index} size={'sm'} colorScheme='cyan'>{listValue.info}</Tag>)
+                                    })}
                                 </Flex>
-                            </CardHeader>
-                            <CardBody>
-                                <Flex gap={2} flexDirection={'column'}>
-                                    <FormLabel>Room Code</FormLabel>
-                                    <Input type='text' value={roomCode} onChange={e => setRoomCode(e.target.value)}
-                                           variant='admin' maxLength={6}/>
-                                    <FormLabel>List Values - {listValues.length}</FormLabel>
-                                    <Input type='text' value={listInput} onChange={e => setListInput(e.target.value)}
-                                           variant='admin'/>
-                                    <Flex flexDirection={'row'} gap={2} flexWrap={'wrap'} maxH={'125px'}
-                                          overflow={'auto'}>
-                                        {listValues.map((listValue, index) => {
-                                            return (
-                                                <Tag key={index} size={'sm'} colorScheme='cyan'>{listValue.info}</Tag>)
-                                        })}
-                                    </Flex>
-                                    <Button onClick={addToListValues}>Add to List</Button>
-                                </Flex>
-                            </CardBody>
-                            <CardFooter>
-                                <Button onClick={saveRoom}>Save Room</Button>
-                            </CardFooter>
-                        </Card>
-                    </Box>
-                }
+                                <Button onClick={addToListValues}>Add to List</Button>
+                            </Flex>
+                        </CardBody>
+                        <CardFooter>
+                            <Button onClick={saveRoom}>Save Room</Button>
+                        </CardFooter>
+                    </Card>
+                </Box>
+            }
 
-                {showRooms &&
-                    <Box>
-                        <Card width={'50vw'}>
-                            <CardHeader>
-                                <Flex flexDirection={"row"}>
-                                    <IconButton aria-label={'Back button'} icon={<ArrowLeftIcon/>} onClick={() => {setShowRooms(false); setShowOptions(false)}}/>
-                                    <Text> List of Rooms </Text>
-                                </Flex>
-                            </CardHeader>
-                            <CardBody>
-                                <Flex gap={2} flexDirection={'column'}>
-                                    {roomList &&
-                                        roomList.map((room, index) => {
-                                            return (
-                                                <Flex key={index} flexDirection={'row'}>
-                                                    <Tag onClick={() => openRoomModal(room)}>
-                                                        {room.code}
-                                                    </Tag>
-                                                </Flex>
-                                            )
-                                        })
-                                    }
-                                </Flex>
-                            </CardBody>
-                            <CardFooter>
-                            </CardFooter>
-                        </Card>
-                    </Box>
-                }
+            {showRooms &&
+                <Box>
+                    <Card width={'50vw'}>
+                        <CardHeader>
+                            <Flex flexDirection={"row"}>
+                                <IconButton aria-label={'Back button'} icon={<ArrowLeftIcon/>} onClick={() => {setShowRooms(false); setShowOptions(false)}}/>
+                                <Text> List of Rooms </Text>
+                            </Flex>
+                        </CardHeader>
+                        <CardBody>
+                            <Flex gap={2} flexDirection={'column'}>
+                                {roomList &&
+                                    roomList.map((room, index) => {
+                                        return (
+                                            <Flex key={index} flexDirection={'row'}>
+                                                <Tag onClick={() => openRoomModal(room)}>
+                                                    {room.code}
+                                                </Tag>
+                                            </Flex>
+                                        )
+                                    })
+                                }
+                            </Flex>
+                        </CardBody>
+                        <CardFooter>
+                        </CardFooter>
+                    </Card>
+                </Box>
+            }
             </Center>
+            :
+            <Center h={'100%'}>
+                <Card>
+                    <CardHeader>
+                        <Text color='black'> Input Admin Password </Text>
+                    </CardHeader>
+                    <CardBody>
+                        <Input onChange={e => setPasswordInput(e.target.value)} value={passwordInput} type="password"/>
+                    </CardBody>
+                </Card>
+            </Center>
+        }
+            
             <ToastContainer/>
         </Box>
     )
