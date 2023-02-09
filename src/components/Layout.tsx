@@ -1,4 +1,3 @@
-import Header from './Header';
 import { SwitchTransition, Transition } from 'react-transition-group';
 import gsap from 'gsap';
 import { useRouter } from 'next/router';
@@ -42,7 +41,6 @@ function Layout ({ children }:any)  {
 
     return (
         <>
-            <Header />
             <SwitchTransition>
                 <Transition
                     key={router.asPath} // our route as a key

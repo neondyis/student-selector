@@ -32,20 +32,20 @@ export default function Room() {
             }
         }
 
-        socket.on('InitiateCurrentTurn', (payload) => {
+        socket.on('InitiateCurrentTurn', (payload:any) => {
             setCurrentTurn(payload.currentTurn);
         })
 
-        socket.on('setCurrentTurn', (payload) => {
+        socket.on('setCurrentTurn', (payload:any) => {
             setCurrentTurn(payload.currentTurn);
         })
 
-        socket.on('BlockRevealSuccess', (payload) =>{
+        socket.on('BlockRevealSuccess', (payload:any) =>{
             dispatch(setBlocks(payload.blocks));
             console.log(payload)
         })
 
-        socket.on('BlockRevealFailed', (payload) =>{
+        socket.on('BlockRevealFailed', (payload:any) =>{
             toast({
                 title: 'Failed to Reveal.',
                 description: payload,
@@ -71,7 +71,7 @@ export default function Room() {
                         Room #{code}
                     </Text>
                     {currentTurn === name &&  <Button isDisabled={isRevealButtonClicked} onClick={revealBlock}>Reveal Block</Button>}
-                    {currentTurn !== '' && <Text> {currentTurn}'s turn</Text>}
+                    {currentTurn !== '' && <Text> {currentTurn} turn</Text>}
                     
                 </Flex>
                     <Grid

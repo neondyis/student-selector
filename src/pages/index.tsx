@@ -43,7 +43,7 @@ export default function Home() {
             console.log("SOCKET CONNECTED!", socket.id);
         });
 
-        socket.on("joinSuccess", (payload) => {
+        socket.on("joinSuccess", (payload: { _id: any; }) => {
             setIsRoomSet(true);
             dispatch(setId(payload._id))
             console.log('efwefewf')
@@ -71,7 +71,7 @@ export default function Home() {
             })
         })
         
-        socket.on("nameSetSuccess", (payload) => {
+        socket.on("nameSetSuccess", (payload: { roomData: { code: any; blocks: any; }; name: any; }) => {
             setIsNameSet(true);
             dispatch(setCode(payload.roomData.code))
             dispatch(setBlocks(payload.roomData.blocks))

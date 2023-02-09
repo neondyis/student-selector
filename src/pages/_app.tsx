@@ -22,6 +22,7 @@ export const roomBackGround = defineStyle({
 });
 
 function App({Component, pageProps}: AppProps) {
+    // eslint-disable-next-line no-unused-vars
     const { store, props } = wrapper.useWrappedStore(pageProps);
 
     const Input = defineStyleConfig({

@@ -32,7 +32,7 @@ export default function Admin() {
     const [roomCode, setRoomCode] = useState('');
     const [listValues, setListValues] = useState<Block[]>([]);
     const [roomList, setRoomList] = useState([]);
-    const [selectedRoom, setSelectedRoom] = useState<{}>();
+    const [selectedRoom, setSelectedRoom] = useState<any>();
     const [currentTurn, setCurrentTurn] = useState('');
     const [passwordInput, setPasswordInput] = useState('');
 
@@ -78,7 +78,7 @@ export default function Admin() {
         })
     }
 
-    const openRoomModal = (room) => {
+    const openRoomModal = (room:any) => {
         setSelectedRoom(room);
         setRoomCode(room.code)
         socket.emit('joinRoom',{code: room.code})
@@ -143,7 +143,7 @@ export default function Admin() {
             socket.emit('getCurrentTurn', {code: roomCode})
         }
 
-        socket.on('InitiateCurrentTurn', (payload) => {
+        socket.on('InitiateCurrentTurn', (payload:any) => {
             setCurrentTurn(payload.currentTurn);
             console.log(payload)
         })
@@ -159,16 +159,16 @@ export default function Admin() {
             })
         })
 
-        socket.on('setCurrentTurn', (payload) => {
+        socket.on('setCurrentTurn', (payload:any) => {
             setCurrentTurn(payload.currentTurn);
         })
 
-        socket.on('BlockRevealSuccess', (payload) =>{
+        socket.on('BlockRevealSuccess', (payload:any) =>{
             setSelectedRoom({...selectedRoom,blocks:payload.blocks})
             console.log(payload)
         })
 
-        socket.on('BlockRevealFailed', (payload) =>{
+        socket.on('BlockRevealFailed', (payload:any) =>{
             toast({
                 title: 'Failed to Reveal.',
                 description: payload,
@@ -323,7 +323,7 @@ export default function Admin() {
                                         return (
                                             <Flex key={index} flexDirection={'row'}>
                                                 <Tag onClick={() => openRoomModal(room)}>
-                                                    {room.code}
+                                                    {room['code']}
                                                 </Tag>
                                             </Flex>
                                         )
