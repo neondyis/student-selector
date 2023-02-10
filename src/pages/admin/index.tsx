@@ -278,8 +278,8 @@ export default function Admin() {
                     <Card width={'50vw'}>
                         <CardHeader>
                             <Flex flexDirection={"row"} alignItems={"center"}>
-                                <IconButton aria-label={'Back button'} icon={<ArrowLeftIcon/>} onClick={() => {setShowCreate(false); setShowOptions(false)}}/>
-                                <Text variant={'admin'} >Creating a Room</Text>
+                                <IconButton variant={"unstyled"} aria-label={'Back button'} icon={<ArrowLeftIcon/>} onClick={() => {setShowCreate(false); setShowOptions(false)}}/>
+                                <Text variant={'admin'} marginLeft={'auto'}  marginRight={'auto'}>Creating a Room</Text>
                             </Flex>
                         </CardHeader>
                         <CardBody>
@@ -301,7 +301,7 @@ export default function Admin() {
                             </Flex>
                         </CardBody>
                         <CardFooter>
-                            <Button onClick={saveRoom}>Save Room</Button>
+                            <Button isDisabled={listValues.length < 20 || roomCode.length !== 6} onClick={saveRoom}>Save Room</Button>
                         </CardFooter>
                     </Card>
                 </Box>
